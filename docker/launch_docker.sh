@@ -2,26 +2,34 @@
 
 XSOCK=/tmp/.X11-unix
 XAUTH=/tmp/.docker.xauth
-touch $XAUTH
+sudo touch $XAUTH
 xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
 
 
 
+# Get the current username
+CURRENT_USER=$(whoami)
+USER_HOME=$(eval echo ~$CURRENT_USER)
+
+# Define the folder name
+FOLDER_NAME="docker_home"
+FOLDER_PATH="$USER_HOME/$FOLDER_NAME"
+
 # Check if the folder exists
-if [ ! -d "$HOME/docker_home" ]; then
+if [ ! -d "$FOLDER_PATH" ]; then
     # Create the folder
-    mkdir "$HOME/docker_home"
+    mkdir -p "$FOLDER_PATH"
     if [ $? -eq 0 ]; then
-        echo "Folder 'docker_home' created successfully!"
+        echo "Folder '$FOLDER_NAME' created successfully in $USER_HOME!"
     else
-        echo "Failed to create folder 'docker_home'."
+        echo "Failed to create folder '$FOLDER_NAME' in $USER_HOME."
     fi
 else
-    echo "Folder 'docker_home' already exists."
+    echo "Folder '$FOLDER_NAME' already exists in $USER_HOME."
 fi
 
 
-docker run --gpus all --privileged --rm -it \
+sudo docker run --gpus all --privileged --rm -it \
            --volume=$XSOCK:$XSOCK:rw \
            --volume=$XAUTH:$XAUTH:rw \
            --volume=$HOME/docker_home:/root/docker_home \
